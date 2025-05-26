@@ -10,7 +10,7 @@ export const useHttpClient = () => {
 		setIsLoading(true)
 
 		const httpAbortCtrl = new AbortController();
-		activeHttpRequests.current.push(httpAbortCtrl)
+		activeHttpRequests.current.push(httpAbortCtrl);
 
 		try {
 			const response = await fetch(url, {
@@ -20,14 +20,19 @@ export const useHttpClient = () => {
 
 			const responseData = await response.json();
 
+			activeHttpRequests.current = activeHttpRequests.current.filter(
+				reqCtrl => reqCtrl !== httpAbortCtrl
+			);
+			// reqCtrl is httpAbortCtrl in activeHttpRequests.current array
+
 			if (!response.ok) {
 				throw new Error(responseData.message);
 			}
 
-			setIsLoading(false) 
+			setIsLoading(false)
 			return responseData
 		} catch (err) {
-			console.log('err from sendRequest function in http-hook', err)
+			console.log('err from sendRequest function in http-hook =>', err)
 			setError(err.message)
 			setIsLoading(false)
 			throw err
