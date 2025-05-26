@@ -1,17 +1,21 @@
-import { useState, useCallback } from "react"
-import LoadingSpinner from "../components/UIElements/LoadingSpinner";
-import ErrorModal from "../components/UIElements/ErrorModal";
+import { useState, useCallback, useEffect, useRef } from "react"
 
 export const useHttpClient = () => {
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState()
 
+	const activeHttpRequests = useRef([])
+
 	const sendRequest = useCallback(async (url, method = 'GET', body = null, headers = {}) => {
 		setIsLoading(true)
 
+		const httpAbortCtrl = new AbortController();
+		activeHttpRequests.current.push(httpAbortCtrl)
+
 		try {
 			const response = await fetch(url, {
-				method, body, headers
+				method, body, headers,
+				signal: httpAbortCtrl.signal
 			});
 
 			const responseData = await response.json();
@@ -25,9 +29,18 @@ export const useHttpClient = () => {
 			console.log('err from sendRequest function in http-hook', err)
 			setError(err.message)
 		}
-
-		setIsLoading(true)
+		setIsLoading(false)
 	}, [])
 
-	return { isLoading, error, sendRequest }
+	const clearError = () => {
+		setError(null)
+	};
+
+	useEffect(() => {
+		return () => {
+			activeHttpRequests.current.forEach(abortCtrl => abortCtrl.abort())
+		}
+	}, [])
+
+	return { isLoading, error, sendRequest, clearError }
 };
