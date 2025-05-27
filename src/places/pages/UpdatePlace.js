@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useContext, useEffect, useState } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
 import { useHttpClient } from '../../shared/hooks/http-hook';
 
 import Input from '../../shared/components/FormElements/Input';
@@ -13,10 +13,13 @@ import { useForm } from '../../shared/hooks/form-hook';
 import './PlaceForm.css';
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner';
 import ErrorModal from '../../shared/components/UIElements/ErrorModal';
+import { AuthContext } from '../../shared/context/auth-context';
 
 const UpdatePlace = () => {
+  const auth = useContext(AuthContext);
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
   const [loadedPlace, setLoadedPlace] = useState();
+  const history = useHistory();
   const placeId = useParams().placeId;
 
 
@@ -60,9 +63,22 @@ const UpdatePlace = () => {
   }, [sendRequest, placeId, setFormData])
 
 
-  const placeUpdateSubmitHandler = event => {
+  const placeUpdateSubmitHandler = async event => {
     event.preventDefault();
-    console.log(formState.inputs);
+    try {
+      await sendRequest(
+        `http://localhost:5000/api/places/${placeId}`,
+        'PATCH',
+        JSON.stringify({
+          title: formState.inputs.title.value,
+          description: formState.inputs.description.value,
+        }),
+        { 'Content-Type': 'application/json' }
+      )
+      history.push('/' + auth.userId + '/places');
+    } catch (err) {
+      console.log('err', err)
+    }
   };
 
   if (!loadedPlace && !error) {
