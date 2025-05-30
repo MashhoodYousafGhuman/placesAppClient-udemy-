@@ -58,7 +58,7 @@ const Auth = () => {
           },
           image: {
             value: null,
-            isValid:false
+            isValid: false
           }
         },
         false
@@ -92,15 +92,23 @@ const Auth = () => {
 
     } else {
       try {
+        const formData = new FormData();
+        formData.append('email', formState.inputs.email.value);
+        formData.append('name', formState.inputs.name.value);
+        formData.append('password', formState.inputs.password.value);
+        formData.append('image', formState.inputs.image.value);
         const responseData = await sendRequest('http://localhost:5000/api/users/signup', 'POST',
-          JSON.stringify({
-            name: formState.inputs.name.value,
-            email: formState.inputs.email.value,
-            password: formState.inputs.password.value
-          }),
-          {
-            'Content-Type': 'application/json'
-          }
+          // JSON.stringify({
+          //   name: formState.inputs.name.value,
+          //   email: formState.inputs.email.value,
+          //   password: formState.inputs.password.value
+          // })
+          // sending with FormData() a built in browserAPI not using json beacuse json can't handle binary format , json cna work with texts and also removes header beacuse with FormData() fetchAPI will automatically adds right header for this req.
+          formData,
+          // {
+          // headers
+          //   'Content-Type': 'application/json'
+          // }
         );
 
         auth.login(responseData.user.id);
@@ -130,7 +138,9 @@ const Auth = () => {
               onInput={inputHandler}
             />
           )}
-          {!isLoginMode && <ImageUpload center id='image' onInput={inputHandler} />}
+          {!isLoginMode &&
+            <ImageUpload id='image' onInput={inputHandler} errorText='Please Provide an Image' />
+          }
           <Input
             element="input"
             id="email"
