@@ -18,15 +18,18 @@ const ImageUpload = props => {
 			setPreviewUrl(fileReader.result);
 		};
 		fileReader.readAsDataURL(file);
+		console.log('fileReader', fileReader)
+		console.log('fileReader.result', fileReader.result)
+		console.log('file', file)
 	}, [file])
 
 	const pickedHandler = event => {
 		console.log(event.target)
 		let pickedFile;
 		let fileIsValid = isValid;
-		if (event.target.files && event.target.length === 1) {
+		if (event.target.files && event.target.files.length === 1) {
 			pickedFile = event.target.files[0];
-			setFile(pickedFile);
+			setFile(pickedFile); 
 			setIsValid(true);
 			fileIsValid = true;
 		} else {
