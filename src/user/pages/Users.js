@@ -13,11 +13,11 @@ const Users = () => {
     const fetchUsers = async () => {
       // making fetchUsers function async because writing async in useEffect directly isn't recommended
       try {
-        const responseData = await sendRequest('http://localhost:5000/api/users');
+        const responseData = await sendRequest(process.env.REACT_APP_BACKEND_URL + '/users');
         setLoadedUsers(responseData.users);
 
       } catch (err) {
-       console.log('err', err)
+        console.log('err', err)
       }
     };
     fetchUsers();
